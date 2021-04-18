@@ -4,6 +4,7 @@ import br.com.max.beerapi.dto.BeerDTO;
 import br.com.max.beerapi.entity.Beer;
 import br.com.max.beerapi.exception.BeerAlreadyRegisteredException;
 import br.com.max.beerapi.exception.BeerNotFoundException;
+import br.com.max.beerapi.exception.BeerStockExceededException;
 import br.com.max.beerapi.mapper.BeerMapper;
 import br.com.max.beerapi.repository.BeerRepository;
 import lombok.AllArgsConstructor;
@@ -46,6 +47,17 @@ public class BeerService {
     public void deleteById(Long id) throws BeerNotFoundException {
         VerifyIfExists(id);
         beerRepository.deleteById(id);
+    }
+
+    public BeerDTO increment(Long id, int quantityToIncrement) throws BeerNotFoundException, BeerStockExceededException {
+        Beer beerToIncrementStock = VerifyIfExists(id);
+        int quantityAfterIncrement = quantityToIncrement + beerToIncrementStock.getQuantity();
+        if (quantityAfterIncrement <= beerToIncrementStock.getMax()) {
+            beerToIncrementStock.setQuantity(quantityAfterIncrement);
+            Beer incrementedBeerStock = beerRepository.save(beerToIncrementStock);
+            return beerMapper.toDTO(incrementedBeerStock);
+        }
+        throw new BeerStockExceededException(id, quantityToIncrement);
     }
 
     private void verifyIfIsAlreadyRegistered(String name) throws BeerAlreadyRegisteredException {
