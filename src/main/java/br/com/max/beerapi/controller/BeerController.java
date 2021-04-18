@@ -4,7 +4,8 @@ import br.com.max.beerapi.dto.BeerDTO;
 import br.com.max.beerapi.dto.QuantityDTO;
 import br.com.max.beerapi.exception.BeerAlreadyRegisteredException;
 import br.com.max.beerapi.exception.BeerNotFoundException;
-import br.com.max.beerapi.exception.BeerStockExceededException;
+import br.com.max.beerapi.exception.BeerStockExceededMaxException;
+import br.com.max.beerapi.exception.BeerStockExceededMinException;
 import br.com.max.beerapi.service.BeerService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,12 @@ public class BeerController {
     }
 
     @PatchMapping("/{id}/increment")
-    public BeerDTO increment(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockExceededException {
+    public BeerDTO increment(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockExceededMaxException {
         return beerService.increment(id, quantityDTO.getQuantity());
+    }
+
+    @PatchMapping("/{id}/decrement")
+    public BeerDTO decrement(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockExceededMinException {
+        return beerService.decrement(id, quantityDTO.getQuantity());
     }
 }
